@@ -15,7 +15,11 @@ export default function RootLayout({ children }) {
 		<html lang="en">
 			<body className={inter.className}>
 				<Navbar />
-				<div className="h-[calc(100vh-5rem)] container mx-auto">{children}</div>
+				<div className="h-[calc(100vh-5rem)] container mx-auto">
+					<div className="flex justify-center items-center h-full w-full">
+						{children}
+					</div>
+				</div>
 			</body>
 		</html>
 	)

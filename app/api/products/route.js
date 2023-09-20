@@ -60,25 +60,26 @@ export async function POST(request) {
 		/********************* 
 		Upload image locally 
 		*********************/
+		// Info in previous commit
+
+		/***********************************
+		Upload image directly to Cloudinary 
+		***********************************/
 		const bytes = await image.arrayBuffer() // image in bytes
 		const buffer = Buffer.from(bytes) // convert to a js buffer
-		// path to save the image: currentWorkingDirectory, /public,   -> string path
-		const filePath = path.join(process.cwd(), 'public', image.name)
-		await writeFile(filePath, buffer)
+		// upload_stream: uploads raw files like buffer
 
-		// Note: When hosted, services like Verce, Onrender, they delete images files since they dont save these
-		// Solution: Use Thrid Party Service, Cloudinary to save images as an url
-
-		/*********************** 
-		Upload image Cloudinary 
-		***********************/
-		const res = await cloudinary.uploader.upload(filePath)
-		//console.log(res)
-
-		// delete image locally
-		if (res) {
-			await unlink(filePath)
-		}
+		// need a promise to send a response
+		const res = await new Promise((resolve, reject) => {
+			cloudinary.uploader
+				.upload_stream({}, (error, result) => {
+					if (error) {
+						reject(error)
+					}
+					resolve(result)
+				})
+				.end(buffer)
+		})
 
 		const result = await connection.query('INSERT INTO product SET ?', {
 			name: data.get('name'),
